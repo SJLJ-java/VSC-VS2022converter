@@ -1,30 +1,33 @@
 name: Build VS2022 Project
 
+# Triggers
 on:
   push:
-    branches: [ main ]         # Runs on every push to main
+    branches: [ main ]         # Trigger on commits to main
   workflow_dispatch:           # Allows manual run in GitHub UI
 
 jobs:
   build:
-    runs-on: windows-latest    # Windows runner with VS2022 installed
+    runs-on: windows-latest    # Use Windows with Visual Studio 2022 pre-installed
 
     steps:
-    # Step 1: Checkout the repo
-    - uses: actions/checkout@v3
+      # 1️⃣ Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    # Step 2: Setup MSBuild (MSVC compiler)
-    - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v1
+      # 2️⃣ Setup MSBuild (MSVC compiler)
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1
 
-    # Step 3: Build the solution
-    - name: Build Solution
-      run: msbuild Week 10 & 11.sln /p:Configuration=Release
+      # 3️⃣ Build the solution
+      - name: Build VS2022 Solution
+        run: msbuild MyProject.sln /p:Configuration=Release
 
-    # Step 4: Upload the compiled binary
-    - name: Upload Binaries
-      uses: actions/upload-artifact@v4
-      with:
-        name: MyProject-Binaries
-        path: ./bin/Release/*
-    # optional: retention-days, compression-level, etc.
+      # 4️⃣ Upload compiled binaries
+      - name: Upload Release Binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: MyProject-Binaries
+          path: ./bin/Release/*        # Adjust path if your build outputs elsewhere
+          retention-days: 30           # Optional: how long to keep artifacts
+          compression-level: 6         # Optional: compress for faster download
