@@ -23,7 +23,8 @@ jobs:
 
     # Step 4: Upload the compiled binary
     - name: Upload Binaries
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: Week 10 & 11-Binaries
+        name: MyProject-Binaries
         path: ./bin/Release/*
+    # optional: retention-days, compression-level, etc.
