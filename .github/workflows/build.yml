@@ -21,13 +21,13 @@ jobs:
 
       # 3️⃣ Build the solution
       - name: Build VS2022 Solution
-        run: msbuild "Week 10 & 11.sln" /p:Configuration=Release
+        run: msbuild solution.sln /p:Configuration=Release
 
       # 4️⃣ Upload compiled binaries
       - name: Upload Release Binaries
         uses: actions/upload-artifact@v4
         with:
-          name: Week 10 & 11 Binaries
+          name: solution-Binaries
           path: /workspaces/VScompress        # Adjust path if your build outputs elsewhere
           retention-days: 30           # Optional: how long to keep artifacts
           compression-level: 6         # Optional: compress for faster download
