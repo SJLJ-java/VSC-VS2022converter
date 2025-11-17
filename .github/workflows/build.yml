@@ -1,0 +1,29 @@
+name: Build VS2022 Project
+
+on:
+  push:
+    branches: [ main ]         # Runs on every push to main
+  workflow_dispatch:           # Allows manual run in GitHub UI
+
+jobs:
+  build:
+    runs-on: windows-latest    # Windows runner with VS2022 installed
+
+    steps:
+    # Step 1: Checkout the repo
+    - uses: actions/checkout@v3
+
+    # Step 2: Setup MSBuild (MSVC compiler)
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1
+
+    # Step 3: Build the solution
+    - name: Build Solution
+      run: msbuild Week 10 & 11.sln /p:Configuration=Release
+
+    # Step 4: Upload the compiled binary
+    - name: Upload Binaries
+      uses: actions/upload-artifact@v3
+      with:
+        name: Week 10 & 11-Binaries
+        path: ./bin/Release/*
