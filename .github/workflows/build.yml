@@ -28,6 +28,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: solution-Binaries
-          path: /workspaces/VScompress        # Adjust path if your build outputs elsewhere
+          path: /workspaces/VScompress/src/main.cpp        # Adjust path if your build outputs elsewhere
           retention-days: 30           # Optional: how long to keep artifacts
           compression-level: 6         # Optional: compress for faster download
