@@ -6,7 +6,7 @@ import subprocess
 from flask import Flask, request, send_file, abort, render_template_string
 
 app = Flask(__name__)
-app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # 16MB limit
+app.config["MAX_CONTENT_LENGTH"] = 512 * 1024 * 1024  # bump to 512MB for folders
 
 UPLOAD_FORM = """
 <!DOCTYPE html>
@@ -25,9 +25,9 @@ button {
     color: white;
     border: none;
     border-radius: 6px;
-    cursor: not-allowed;           /* cursor for disabled */
-    opacity: 0.5;                  /* greyed out */
-    background: grey;               /* grey background when disabled */
+    cursor: not-allowed;           
+    opacity: 0.5;
+    background: grey;
     transition: opacity 0.3s ease, background 0.3s ease;
 }
 
@@ -54,17 +54,26 @@ button:enabled {
 </head>
 <body>
 <h2>VS2022 Auto Converter</h2>
-<p>Upload a single .cpp or .h file. VS project will be created automatically.</p>
+<p>Upload any number of .cpp/.h files OR an entire folder.</p>
 <form action="/convert" method="post" enctype="multipart/form-data" id="uploadForm">
 <div class="box">
-<input type="file" name="file" accept=".cpp,.h" id="fileInput" required>
+
+<!-- Folder + multi-file upload -->
+<input type="file" 
+       name="files" 
+       id="fileInput"
+       webkitdirectory 
+       directory 
+       multiple 
+       accept=".cpp,.h">
+
 <br>
 <button type="submit" id="convertBtn" disabled>Do the thing!</button>
 </div>
 </form>
 
 <script>
-// Enable button only after a file is selected
+// Enable the RGB button only after selecting files
 const fileInput = document.getElementById("fileInput");
 const convertBtn = document.getElementById("convertBtn");
 
@@ -76,7 +85,7 @@ fileInput.addEventListener("change", () => {
 </html>
 """
 
-# Minimal template files for a VS2022 project
+
 VCXPROJ_TEMPLATE = """<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
@@ -91,36 +100,50 @@ FILTERS_TEMPLATE = """<?xml version="1.0" encoding="utf-8"?>
 </Project>
 """
 
+
 @app.get("/")
 def index():
     return UPLOAD_FORM
 
+
 @app.post("/convert")
 def convert_file():
-    if "file" not in request.files:
-        abort(400, "No file uploaded")
-    uploaded = request.files["file"]
-    if uploaded.filename == "" or not uploaded.filename.lower().endswith((".cpp", ".h")):
-        abort(400, "Must upload a .cpp or .h file")
 
-    # create temporary project folder
+    uploaded_files = request.files.getlist("files")
+
+    if not uploaded_files or uploaded_files[0].filename == "":
+        abort(400, "No files uploaded")
+
     workdir = tempfile.mkdtemp()
-    src_dir = os.path.join(workdir, "src")
-    os.makedirs(src_dir, exist_ok=True)
 
-    # save uploaded file into src/
-    file_path = os.path.join(src_dir, uploaded.filename)
-    uploaded.save(file_path)
+    # Save each uploaded file WITH its folder structure
+    for f in uploaded_files:
 
-    # create minimal project files
+        raw_disp = f.headers.get("Content-Disposition", "")
+        if "filename=" not in raw_disp:
+            continue
+
+        # Extract the full folder path
+        rel_path = raw_disp.split("filename=")[1].strip('"')
+        rel_path = rel_path.replace("\\", "/")
+
+        # Ensure folder exists
+        full_out = os.path.join(workdir, rel_path)
+        os.makedirs(os.path.dirname(full_out), exist_ok=True)
+
+        # Save file
+        f.save(full_out)
+
+    # Create minimal project files in root
     vcxproj_file = os.path.join(workdir, "VScompress.vcxproj")
     filters_file = os.path.join(workdir, "VScompress.filters")
+
     with open(vcxproj_file, "w", encoding="utf-8") as f:
         f.write(VCXPROJ_TEMPLATE)
     with open(filters_file, "w", encoding="utf-8") as f:
         f.write(FILTERS_TEMPLATE)
 
-    # get absolute path to scripts
+    # Run your conversion scripts
     script_dir = os.path.dirname(os.path.abspath(__file__))
     try:
         subprocess.run(
@@ -134,22 +157,23 @@ def convert_file():
     except subprocess.CalledProcessError as e:
         return f"Conversion failed: {e}", 500
 
-    # zip everything
-    result_zip = io.BytesIO()
-    with zipfile.ZipFile(result_zip, "w", zipfile.ZIP_DEFLATED) as z:
-        for root_dir, dirs, files in os.walk(workdir):
-            for f in files:
-                full_path = os.path.join(root_dir, f)
-                rel_path = os.path.relpath(full_path, workdir)
-                z.write(full_path, arcname=rel_path)
+    # ZIP everything
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+        for root, dirs, files in os.walk(workdir):
+            for file in files:
+                full = os.path.join(root, file)
+                rel = os.path.relpath(full, workdir)
+                z.write(full, rel)
 
-    result_zip.seek(0)
+    buf.seek(0)
     return send_file(
-        result_zip,
+        buf,
         as_attachment=True,
         download_name="VS2022_converted.zip",
         mimetype="application/zip"
     )
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
