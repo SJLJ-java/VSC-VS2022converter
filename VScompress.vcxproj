@@ -34,9 +34,8 @@
   </ns0:PropertyGroup>
 
   <ns0:ItemGroup>
-    <ns0:ClCompile Include="src\main.cpp" />
-  </ns0:ItemGroup>
+    <ns0:ClCompile Include="src/notMain.cpp" /></ns0:ItemGroup>
 
   <ns0:Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ns0:Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-</ns0:Project>
+<ns0:ItemGroup /></ns0:Project>
