@@ -21,12 +21,12 @@ button { margin-top: 15px; padding: 10px 22px; font-size: 17px; }
 </head>
 <body>
 <h2>VS2022 Auto Converter</h2>
-<p>Upload a single .cpp or .h file. A minimal VS2022 project will be created automatically.</p>
+<p>Upload a single .cpp or .h file. It will convert it into a Visal Studio project.</p>
 <form action="/convert" method="post" enctype="multipart/form-data">
 <div class="box">
 <input type="file" name="file" accept=".cpp,.h" required>
 <br>
-<button type="submit">Convert Now</button>
+<button type="submit">Do the thing!</button>
 </div>
 </form>
 </body>
