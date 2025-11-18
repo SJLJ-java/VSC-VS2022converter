@@ -38,4 +38,4 @@
 
   <ns0:Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ns0:Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-<ns0:ItemGroup /><ns0:ItemGroup /><ns0:ItemGroup /><ns0:ItemGroup /><ns0:ItemGroup /><ns0:ItemGroup /><ns0:ItemGroup /><ns0:ItemGroup /><ns0:ItemGroup /></ns0:Project>
+<ns0:ItemGroup /><ns0:ItemGroup /><ns0:ItemGroup /><ns0:ItemGroup /><ns0:ItemGroup /><ns0:ItemGroup /><ns0:ItemGroup /><ns0:ItemGroup /><ns0:ItemGroup /><ns0:ItemGroup /></ns0:Project>
