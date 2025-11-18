@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as ET
 import glob
 
-VCXPROJ_FILE = "Project/Project.vcxproj"
+VCXPROJ_FILE = "/workspaces/VScompress/VScompress.vcxproj"
 
 # find all code files
 source_files = sorted(glob.glob("src/**/*.cpp", recursive=True))

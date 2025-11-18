@@ -2,7 +2,7 @@ import xml.etree.ElementTree as ET
 import glob
 import os
 
-FILTER_FILE = "Project/Project.vcxproj.filters"
+FILTER_FILE = "/workspaces/VScompress/VScompress.filters"
 
 source_files = sorted(glob.glob("src/**/*.cpp", recursive=True))
 header_files = sorted(glob.glob("src/**/*.h", recursive=True))
