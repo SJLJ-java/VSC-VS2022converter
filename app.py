@@ -35,6 +35,15 @@ button { margin-top: 15px; padding: 10px 22px; font-size: 17px; }
 body { font-family: Arial; padding: 30px; }
 .box { border: 2px dashed #333; padding: 30px; width: 400px; text-align: center; }
 
+<!DOCTYPE html>
+<html>
+<head>
+<title>VS2022 Converter</title>
+<style>
+body { font-family: Arial; padding: 30px; }
+.box { border: 2px dashed #333; padding: 30px; width: 400px; text-align: center; }
+
+/* Button styles */
 button {
     margin-top: 15px;
     padding: 10px 22px;
@@ -42,11 +51,21 @@ button {
     color: white;
     border: none;
     border-radius: 6px;
+    cursor: not-allowed;           /* cursor for disabled */
+    opacity: 0.5;                  /* greyed out */
+    background: grey;               /* grey background when disabled */
+    transition: opacity 0.3s ease, background 0.3s ease;
+}
+
+/* Enabled state */
+button:enabled {
     cursor: pointer;
+    opacity: 1;
     background: rgb(255,0,0);
     animation: color-rotate 6s linear infinite;
 }
 
+/* RGB color rotation */
 @keyframes color-rotate {
     0%   { background-color: rgb(255,0,0); }
     14%  { background-color: rgb(255,127,0); }
@@ -58,6 +77,30 @@ button {
     100% { background-color: rgb(255,0,0); }
 }
 </style>
+</head>
+<body>
+<h2>VS2022 Auto Converter</h2>
+<p>Upload a single .cpp or .h file. A minimal VS2022 project will be created automatically.</p>
+<form action="/convert" method="post" enctype="multipart/form-data" id="uploadForm">
+<div class="box">
+<input type="file" name="file" accept=".cpp,.h" id="fileInput" required>
+<br>
+<button type="submit" id="convertBtn" disabled>Convert Now</button>
+</div>
+</form>
+
+<script>
+// Enable button only after a file is selected
+const fileInput = document.getElementById("fileInput");
+const convertBtn = document.getElementById("convertBtn");
+
+fileInput.addEventListener("change", () => {
+    convertBtn.disabled = !fileInput.files.length;
+});
+</script>
+</body>
+</html>
+
 """
 
 # Minimal template files for a VS2022 project
