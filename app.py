@@ -31,6 +31,33 @@ button { margin-top: 15px; padding: 10px 22px; font-size: 17px; }
 </form>
 </body>
 </html>
+<style>
+body { font-family: Arial; padding: 30px; }
+.box { border: 2px dashed #333; padding: 30px; width: 400px; text-align: center; }
+
+button {
+    margin-top: 15px;
+    padding: 10px 22px;
+    font-size: 17px;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    background: rgb(255,0,0);
+    animation: color-rotate 6s linear infinite;
+}
+
+@keyframes color-rotate {
+    0%   { background-color: rgb(255,0,0); }
+    14%  { background-color: rgb(255,127,0); }
+    28%  { background-color: rgb(255,255,0); }
+    42%  { background-color: rgb(0,255,0); }
+    57%  { background-color: rgb(0,0,255); }
+    71%  { background-color: rgb(75,0,130); }
+    85%  { background-color: rgb(148,0,211); }
+    100% { background-color: rgb(255,0,0); }
+}
+</style>
 """
 
 # Minimal template files for a VS2022 project
