@@ -13,7 +13,7 @@
       <ns0:UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</ns0:UniqueIdentifier>
       <ns0:Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</ns0:Extensions>
     </ns0:Filter>
-  <ClCompile Include="src/main.cpp"><Filter>src</Filter></ClCompile><ClCompile Include="src/main.cpp"><Filter>src</Filter></ClCompile><ClCompile Include="src/main.cpp"><Filter>src</Filter></ClCompile><ClCompile Include="src/notMain.cpp"><Filter>src</Filter></ClCompile><ClCompile Include="src/notMain.cpp"><Filter>src</Filter></ClCompile><ClCompile Include="src/notMain.cpp"><Filter>src</Filter></ClCompile></ns0:ItemGroup>
+  <ClCompile Include="src/main.cpp"><Filter>src</Filter></ClCompile><ClCompile Include="src/main.cpp"><Filter>src</Filter></ClCompile><ClCompile Include="src/main.cpp"><Filter>src</Filter></ClCompile><ClCompile Include="src/notMain.cpp"><Filter>src</Filter></ClCompile><ClCompile Include="src/notMain.cpp"><Filter>src</Filter></ClCompile><ClCompile Include="src/notMain.cpp"><Filter>src</Filter></ClCompile><ClCompile Include="src/notMain.cpp"><Filter>src</Filter></ClCompile></ns0:ItemGroup>
   <ns0:ItemGroup>
     <ns0:ClCompile Include="trianglePrinter.cpp">
       <ns0:Filter>Source Files</ns0:Filter>
