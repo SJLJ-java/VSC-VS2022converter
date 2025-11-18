@@ -81,11 +81,11 @@ def convert_file():
     script_dir = os.path.dirname(os.path.abspath(__file__))
     try:
         subprocess.run(
-            ["python3", os.path.join(script_dir, "update_filters.py")],
+            ["python3", os.path.join(script_dir, "tools/update_filters.py")],
             cwd=workdir, check=True
         )
         subprocess.run(
-            ["python3", os.path.join(script_dir, "update_vcxproj.py")],
+            ["python3", os.path.join(script_dir, "tools/update_vcxproj.py")],
             cwd=workdir, check=True
         )
     except subprocess.CalledProcessError as e:
