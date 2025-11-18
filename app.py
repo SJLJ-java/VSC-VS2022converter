@@ -6,9 +6,8 @@ import subprocess
 from flask import Flask, request, send_file, abort, render_template_string
 
 app = Flask(__name__)
-app.config["MAX_CONTENT_LENGTH"] = 64 * 1024 * 1024  # 64MB limit
+app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # 16MB limit for single files
 
-# Minimal HTML UI
 UPLOAD_FORM = """
 <!DOCTYPE html>
 <html>
@@ -22,10 +21,10 @@ button { margin-top: 15px; padding: 10px 22px; font-size: 17px; }
 </head>
 <body>
 <h2>VS2022 Auto Converter</h2>
-<p>Select a ZIP C++ project and it will be converted.</p>
+<p>Upload a single .cpp or .h file. A minimal VS2022 project will be created automatically.</p>
 <form action="/convert" method="post" enctype="multipart/form-data">
 <div class="box">
-<input type="file" name="file" accept=".zip" required>
+<input type="file" name="file" accept=".cpp,.h" required>
 <br>
 <button type="submit">Convert Now</button>
 </div>
@@ -34,32 +33,58 @@ button { margin-top: 15px; padding: 10px 22px; font-size: 17px; }
 </html>
 """
 
+# Minimal template files for a VS2022 project
+VCXPROJ_TEMPLATE = """<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+  </ItemGroup>
+</Project>
+"""
+
+FILTERS_TEMPLATE = """<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+  </ItemGroup>
+</Project>
+"""
+
 @app.get("/")
 def index():
     return UPLOAD_FORM
 
 @app.post("/convert")
-def convert_zip():
+def convert_file():
     if "file" not in request.files:
-        abort(400, "Missing file upload")
+        abort(400, "No file uploaded")
+    uploaded = request.files["file"]
+    if uploaded.filename == "" or not uploaded.filename.lower().endswith((".cpp", ".h")):
+        abort(400, "Must upload a .cpp or .h file")
 
-    uploaded_zip = request.files["file"]
-    if uploaded_zip.filename == "" or not uploaded_zip.filename.lower().endswith(".zip"):
-        abort(400, "Must upload a .zip file")
-
+    # create a temporary project folder
     workdir = tempfile.mkdtemp()
-    # Extract uploaded zip
+    src_dir = os.path.join(workdir, "src")
+    os.makedirs(src_dir, exist_ok=True)
+
+    # save uploaded file into src/
+    file_path = os.path.join(src_dir, uploaded.filename)
+    uploaded.save(file_path)
+
+    # create minimal project files
+    vcxproj_file = os.path.join(workdir, "VScompress.vcxproj")
+    filters_file = os.path.join(workdir, "VScompress.filters")
+    with open(vcxproj_file, "w", encoding="utf-8") as f:
+        f.write(VCXPROJ_TEMPLATE)
+    with open(filters_file, "w", encoding="utf-8") as f:
+        f.write(FILTERS_TEMPLATE)
+
+    # Run your converter scripts
     try:
-        with zipfile.ZipFile(uploaded_zip) as z:
-            z.extractall(workdir)
-    except zipfile.BadZipFile:
-        abort(400, "Invalid ZIP file")
+        subprocess.run(["python3", "convert_filters.py"], cwd=workdir, check=True)
+        subprocess.run(["python3", "convert_vcxproj.py"], cwd=workdir, check=True)
+    except subprocess.CalledProcessError as e:
+        return f"Conversion failed: {e}", 500
 
-    # Run converter scripts inside extracted folder
-    subprocess.run(["python3", os.path.join(workdir, "..", "convert_filters.py")], cwd=workdir, check=True)
-    subprocess.run(["python3", os.path.join(workdir, "..", "convert_vcxproj.py")], cwd=workdir, check=True)
-
-    # Create output zip
+    # Zip everything
     result_zip = io.BytesIO()
     with zipfile.ZipFile(result_zip, "w", zipfile.ZIP_DEFLATED) as z:
         for root_dir, dirs, files in os.walk(workdir):
@@ -69,11 +94,7 @@ def convert_zip():
                 z.write(full_path, arcname=rel_path)
 
     result_zip.seek(0)
-    return send_file(result_zip,
-                     as_attachment=True,
-                     download_name="VS2022_converted.zip",
-                     mimetype="application/zip")
-
+    return send_file(result_zip, as_attachment=True, download_name="VS2022_converted.zip", mimetype="application/zip")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
