@@ -80,7 +80,7 @@ button:enabled {
 </head>
 <body>
 <h2>VS2022 Auto Converter</h2>
-<p>Upload a single .cpp or .h file. A minimal VS2022 project will be created automatically.</p>
+<p>Upload a single .cpp or .h file.</p>
 <form action="/convert" method="post" enctype="multipart/form-data" id="uploadForm">
 <div class="box">
 <input type="file" name="file" accept=".cpp,.h" id="fileInput" required>
@@ -100,7 +100,6 @@ fileInput.addEventListener("change", () => {
 </script>
 </body>
 </html>
-
 """
 
 # Minimal template files for a VS2022 project
