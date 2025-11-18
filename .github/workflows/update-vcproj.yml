@@ -1,0 +1,31 @@
+name: Update Visual Studio Project Files
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Run project updaters
+      run: |
+        python tools/update_vcxproj.py
+        python tools/update_filters.py
+
+    - name: Commit changes
+      run: |
+        git config user.name "Automation Bot"
+        git config user.email "bot@example.com"
+        git add .
+        git commit -m "Auto-update vcxproj and filters" || echo "No changes"
+        git push
