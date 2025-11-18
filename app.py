@@ -16,32 +16,6 @@ UPLOAD_FORM = """
 <style>
 body { font-family: Arial; padding: 30px; }
 .box { border: 2px dashed #333; padding: 30px; width: 400px; text-align: center; }
-button { margin-top: 15px; padding: 10px 22px; font-size: 17px; }
-</style>
-</head>
-<body>
-<h2>VS2022 Auto Converter</h2>
-<p>Upload a single .cpp or .h file. It will convert it into a Visal Studio project.</p>
-<form action="/convert" method="post" enctype="multipart/form-data">
-<div class="box">
-<input type="file" name="file" accept=".cpp,.h" required>
-<br>
-<button type="submit">Do the thing!</button>
-</div>
-</form>
-</body>
-</html>
-<style>
-body { font-family: Arial; padding: 30px; }
-.box { border: 2px dashed #333; padding: 30px; width: 400px; text-align: center; }
-
-<!DOCTYPE html>
-<html>
-<head>
-<title>VS2022 Converter</title>
-<style>
-body { font-family: Arial; padding: 30px; }
-.box { border: 2px dashed #333; padding: 30px; width: 400px; text-align: center; }
 
 /* Button styles */
 button {
@@ -80,7 +54,7 @@ button:enabled {
 </head>
 <body>
 <h2>VS2022 Auto Converter</h2>
-<p>Upload a single .cpp or .h file.</p>
+<p>Upload a single .cpp or .h file. A minimal VS2022 project will be created automatically.</p>
 <form action="/convert" method="post" enctype="multipart/form-data" id="uploadForm">
 <div class="box">
 <input type="file" name="file" accept=".cpp,.h" id="fileInput" required>
