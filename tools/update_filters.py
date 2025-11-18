@@ -7,7 +7,7 @@ FILTER_FILE = "VScompress.filters"
 NS = "http://schemas.microsoft.com/developer/msbuild/2003"
 ns = {"ns": NS}
 
-# Make sure FILTER_FILE exists; create minimal template if missing
+# Create minimal .filters if missing
 if not os.path.exists(FILTER_FILE):
     with open(FILTER_FILE, "w", encoding="utf-8") as f:
         f.write("""<?xml version="1.0" encoding="utf-8"?>
@@ -25,7 +25,7 @@ group = root.find(".//ns:ItemGroup", ns)
 if group is None:
     group = ET.SubElement(root, f"{{{NS}}}ItemGroup")
 
-# Gather source and header files
+# Gather source/header files
 source_files = sorted(glob.glob("src/**/*.cpp", recursive=True))
 header_files = sorted(glob.glob("src/**/*.h", recursive=True))
 
@@ -41,9 +41,7 @@ def add_files(tag, files):
             f_elem = ET.SubElement(elem, "Filter")
             f_elem.text = folder
 
-# Add files safely
 add_files("ClCompile", source_files)
 add_files("ClInclude", header_files)
 
-# Write back
 tree.write(FILTER_FILE, encoding="utf-8", xml_declaration=True)

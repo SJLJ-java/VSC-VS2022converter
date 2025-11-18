@@ -6,7 +6,7 @@ VCXPROJ_FILE = "VScompress.vcxproj"
 NS = "http://schemas.microsoft.com/developer/msbuild/2003"
 ns = {"ns": NS}
 
-# Ensure VCXPROJ exists
+# Create minimal .vcxproj if missing
 if not os.path.exists(VCXPROJ_FILE):
     with open(VCXPROJ_FILE, "w", encoding="utf-8") as f:
         f.write("""<?xml version="1.0" encoding="utf-8"?>
@@ -16,7 +16,7 @@ if not os.path.exists(VCXPROJ_FILE):
 </Project>
 """)
 
-# Gather all source/header files
+# Gather files
 source_files = sorted(glob.glob("src/**/*.cpp", recursive=True))
 header_files = sorted(glob.glob("src/**/*.h", recursive=True))
 
@@ -33,7 +33,6 @@ def sync_group(tag, real_files):
     if group is None:
         group = ET.SubElement(root, f"{{{NS}}}ItemGroup")
 
-    # Existing entries
     existing_elems = group.findall(f"ns:{tag}", ns)
     existing_paths = {e.attrib["Include"]: e for e in existing_elems}
     real_set = set(real_files)

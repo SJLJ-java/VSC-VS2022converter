@@ -6,7 +6,7 @@ import subprocess
 from flask import Flask, request, send_file, abort, render_template_string
 
 app = Flask(__name__)
-app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # 16MB limit for single files
+app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # 16MB limit
 
 UPLOAD_FORM = """
 <!DOCTYPE html>
@@ -60,7 +60,7 @@ def convert_file():
     if uploaded.filename == "" or not uploaded.filename.lower().endswith((".cpp", ".h")):
         abort(400, "Must upload a .cpp or .h file")
 
-    # create a temporary project folder
+    # create temporary project folder
     workdir = tempfile.mkdtemp()
     src_dir = os.path.join(workdir, "src")
     os.makedirs(src_dir, exist_ok=True)
@@ -77,14 +77,21 @@ def convert_file():
     with open(filters_file, "w", encoding="utf-8") as f:
         f.write(FILTERS_TEMPLATE)
 
-    # Run your converter scripts
+    # get absolute path to scripts
+    script_dir = os.path.dirname(os.path.abspath(__file__))
     try:
-        subprocess.run(["python3", "convert_filters.py"], cwd=workdir, check=True)
-        subprocess.run(["python3", "convert_vcxproj.py"], cwd=workdir, check=True)
+        subprocess.run(
+            ["python3", os.path.join(script_dir, "convert_filters.py")],
+            cwd=workdir, check=True
+        )
+        subprocess.run(
+            ["python3", os.path.join(script_dir, "convert_vcxproj.py")],
+            cwd=workdir, check=True
+        )
     except subprocess.CalledProcessError as e:
         return f"Conversion failed: {e}", 500
 
-    # Zip everything
+    # zip everything
     result_zip = io.BytesIO()
     with zipfile.ZipFile(result_zip, "w", zipfile.ZIP_DEFLATED) as z:
         for root_dir, dirs, files in os.walk(workdir):
@@ -94,7 +101,12 @@ def convert_file():
                 z.write(full_path, arcname=rel_path)
 
     result_zip.seek(0)
-    return send_file(result_zip, as_attachment=True, download_name="VS2022_converted.zip", mimetype="application/zip")
+    return send_file(
+        result_zip,
+        as_attachment=True,
+        download_name="VS2022_converted.zip",
+        mimetype="application/zip"
+    )
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
