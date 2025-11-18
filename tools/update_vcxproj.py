@@ -1,30 +1,53 @@
 import xml.etree.ElementTree as ET
 import glob
+import os
 
 VCXPROJ_FILE = "VScompress.vcxproj"
+NS = "http://schemas.microsoft.com/developer/msbuild/2003"
+ns = {"ns": NS}
 
-# find all code files
+# Collect all existing real files
 source_files = sorted(glob.glob("src/**/*.cpp", recursive=True))
 header_files = sorted(glob.glob("src/**/*.h", recursive=True))
 
 tree = ET.parse(VCXPROJ_FILE)
 root = tree.getroot()
 
-ns = {'ns': 'http://schemas.microsoft.com/developer/msbuild/2003'}
+def sync_group(tag, real_files):
+    """Remove missing files, add new ones, keep correct namespace."""
 
-def ensure_file(group_xpath, tag, files):
-    group = root.find(group_xpath, ns)
+    groups = root.findall(".//ns:ItemGroup", ns)
+    group = None
+
+    # Locate the ItemGroup already containing this type
+    for g in groups:
+        if g.find(f"ns:{tag}", ns) is not None:
+            group = g
+            break
+
+    # If missing, create a new ItemGroup
     if group is None:
-        group = ET.SubElement(root, "ItemGroup")
+        group = ET.SubElement(root, f"{{{NS}}}ItemGroup")
 
-    existing = {elem.attrib['Include'] for elem in group.findall(tag, ns)}
+    # Find existing entries
+    existing_elems = group.findall(f"ns:{tag}", ns)
+    existing_paths = {e.attrib["Include"]: e for e in existing_elems}
 
-    for file in files:
-        if file not in existing:
-            elem = ET.SubElement(group, tag)
-            elem.set("Include", file)
+    real_set = set(real_files)
 
-ensure_file(".//ns:ItemGroup", "ClCompile", source_files)
-ensure_file(".//ns:ItemGroup", "ClInclude", header_files)
+    # REMOVE missing files
+    for path, elem in list(existing_paths.items()):
+        if path not in real_set:
+            group.remove(elem)
+
+    # ADD missing files
+    for f in real_files:
+        if f not in existing_paths:
+            elem = ET.SubElement(group, f"{{{NS}}}{tag}")
+            elem.set("Include", f)
+
+# Sync both sections
+sync_group("ClCompile", source_files)
+sync_group("ClInclude", header_files)
 
 tree.write(VCXPROJ_FILE, encoding="utf-8", xml_declaration=True)

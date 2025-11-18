@@ -19,7 +19,12 @@ def add_files(tag, files):
         if f in existing:
             continue
 
-        group = root.find(".//ns:ItemGroup", ns)
+        groups = root.findall(".//ns:ItemGroup", ns)
+        if tag == "ClCompile":
+            group = groups[-2]
+        else:
+            group = groups[-1]
+
         elem = ET.SubElement(group, tag)
         elem.set("Include", f)
 
