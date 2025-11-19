@@ -30,8 +30,11 @@
 <h2>VS2022 Converter</h2>
 
 <!-- File input -->
-<input type="file" id="fileInput" webkitdirectory 
-directory multiple accept=".cpp,.h">
+<select id="modeSelect">
+  <option value="files">Select Files</option>
+  <option value="folder">Select Folder</option>
+</select>
+<input type="file" id="fileInput" multiple accept=".cpp,.h">
 <br><br>
 
 

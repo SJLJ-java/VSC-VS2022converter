@@ -60,3 +60,16 @@ convertBtn.addEventListener("click", async () => {
     a.download = "VS2022_Converted_Project.zip";
     a.click();
 });
+
+const fileInput = document.getElementById("fileInput");
+const modeSelect = document.getElementById("modeSelect");
+
+modeSelect.addEventListener("change", () => {
+    if (modeSelect.value === "folder") {
+        fileInput.setAttribute("webkitdirectory", "");
+        fileInput.setAttribute("directory", "");
+    } else {
+        fileInput.removeAttribute("webkitdirectory");
+        fileInput.removeAttribute("directory");
+    }
+});
