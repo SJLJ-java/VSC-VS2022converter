@@ -1,153 +1,72 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>VS2022 Converter</title>
+    <title>File Upload</title>
     <style>
-        #convertBtn {
-            padding: 10px 20px;
-            font-size: 16px;
+        /* Normal look */
+        #fileInput {
+            padding: 10px;
+            border: 2px solid #555;
+            border-radius: 6px;
+            transition: border-color 0.3s;
         }
 
-        #convertBtn:disabled {
-            background: #777;
-            cursor: not-allowed;
+        /* RGB animation class */
+        .rgb-border {
+            animation: rgbFlash 2s infinite;
         }
 
-        @keyframes rgbRotate {
-            0%   { background: red; }
-            33%  { background: green; }
-            66%  { background: blue; }
-            100% { background: red; }
-        }
-
-        #convertBtn.enabled {
-            color: white;
-            animation: rgbRotate 3s linear infinite;
-        }
-
-        #dropZone {
-            width: 100%;
-            height: 100px;
-            border: 2px dashed #aaa;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 10px;
-            cursor: pointer;
+        @keyframes rgbFlash {
+            0%   { border-color: red; }
+            33%  { border-color: lime; }
+            66%  { border-color: cyan; }
+            100% { border-color: red; }
         }
 
         #fileList {
             margin-top: 10px;
-            max-height: 200px;
-            overflow-y: auto;
-            border: 1px solid #ccc;
-            padding: 5px;
+            padding-left: 0;
         }
-
-        #fileList div {
-            padding: 2px 0;
-            font-family: monospace;
+        #fileList li {
+            list-style: none;
+            background: #eee;
+            margin-bottom: 4px;
+            padding: 6px;
+            border-radius: 4px;
         }
     </style>
 </head>
 <body>
 
-<h2>VS2022 Converter</h2>
+<h2>Select CPP Files</h2>
 
-<select id="modeSelect">
-    <option value="files">Select Files</option>
-    <option value="folder">Select Folder</option>
-</select>
+<form action="/upload" method="POST" enctype="multipart/form-data">
+    <input id="fileInput" type="file" name="file" accept=".cpp" required>
+    <button type="submit">Upload</button>
+</form>
 
-<input type="file" id="fileInput" multiple accept=".cpp,.h,.hpp" style="display:none">
-<div id="dropZone">Drag files/folder here or click</div>
-
-<div id="fileList"></div>
-
-<button id="convertBtn" disabled>Choose files first...</button>
+<ul id="fileList"></ul>
 
 <script>
-const fileInput = document.getElementById("fileInput");
-const convertBtn = document.getElementById("convertBtn");
-const dropZone = document.getElementById("dropZone");
-const modeSelect = document.getElementById("modeSelect");
-const fileListDiv = document.getElementById("fileList");
+    const fileInput = document.getElementById("fileInput");
+    const fileList = document.getElementById("fileList");
 
-let selectedFiles = [];
+    fileInput.addEventListener("change", () => {
 
-// Update the button and animation
-function updateButtonState() {
-    if (selectedFiles.length > 0) {
-        convertBtn.disabled = false;
-        convertBtn.classList.add("enabled");  // RGB animation
-        convertBtn.textContent = "Convert to VS2022 Package";
-    } else {
-        convertBtn.disabled = true;
-        convertBtn.classList.remove("enabled");
-        convertBtn.textContent = "Choose files first...";
-    }
-    updateFileList();
-}
+        // Turn RGB when file chosen
+        if (fileInput.files.length > 0) {
+            fileInput.classList.add("rgb-border");
+        } else {
+            fileInput.classList.remove("rgb-border");
+        }
 
-// Display file names
-function updateFileList() {
-    fileListDiv.innerHTML = "";
-    selectedFiles.forEach(f => {
-        const div = document.createElement("div");
-        div.textContent = f.name;
-        fileListDiv.appendChild(div);
+        // Add selected file to list
+        for (let file of fileInput.files) {
+            const li = document.createElement("li");
+            li.textContent = file.name;
+            fileList.appendChild(li);
+        }
     });
-}
-
-// Clicking drop zone opens file/folder picker
-dropZone.onclick = () => fileInput.click();
-
-// Drag-and-drop
-dropZone.addEventListener("dragover", e => {
-    e.preventDefault();
-    dropZone.style.background = "#eef";
-});
-dropZone.addEventListener("dragleave", () => dropZone.style.background = "");
-dropZone.addEventListener("drop", e => {
-    e.preventDefault();
-    dropZone.style.background = "";
-    selectedFiles = Array.from(e.dataTransfer.files);
-    updateButtonState();
-});
-
-// File input change
-fileInput.addEventListener("change", () => {
-    selectedFiles = Array.from(fileInput.files);
-    updateButtonState();
-});
-
-// Mode select for folder picker
-modeSelect.addEventListener("change", () => {
-    if (modeSelect.value === "folder") {
-        fileInput.setAttribute("webkitdirectory", "");
-        fileInput.setAttribute("directory", "");
-    } else {
-        fileInput.removeAttribute("webkitdirectory");
-        fileInput.removeAttribute("directory");
-    }
-});
-
-// Convert button click -> send files to Flask backend
-convertBtn.addEventListener("click", async () => {
-    if (convertBtn.disabled) return;
-
-    const formData = new FormData();
-    selectedFiles.forEach(f => formData.append("files", f));
-
-    const response = await fetch("/convert", { method: "POST", body: formData });
-    const blob = await response.blob();
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "VS2022_Converted_Project.zip";
-    a.click();
-});
 </script>
 
 </body>
