@@ -35,6 +35,19 @@
             margin-bottom: 10px;
             cursor: pointer;
         }
+
+        #fileList {
+            margin-top: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 5px;
+        }
+
+        #fileList div {
+            padding: 2px 0;
+            font-family: monospace;
+        }
     </style>
 </head>
 <body>
@@ -45,8 +58,12 @@
     <option value="files">Select Files</option>
     <option value="folder">Select Folder</option>
 </select>
+
 <input type="file" id="fileInput" multiple accept=".cpp,.h,.hpp" style="display:none">
 <div id="dropZone">Drag files/folder here or click</div>
+
+<div id="fileList"></div>
+
 <button id="convertBtn" disabled>Choose files first...</button>
 
 <script>
@@ -54,20 +71,32 @@ const fileInput = document.getElementById("fileInput");
 const convertBtn = document.getElementById("convertBtn");
 const dropZone = document.getElementById("dropZone");
 const modeSelect = document.getElementById("modeSelect");
+const fileListDiv = document.getElementById("fileList");
 
 let selectedFiles = [];
 
-// Enable/disable button
+// Update the button and animation
 function updateButtonState() {
     if (selectedFiles.length > 0) {
         convertBtn.disabled = false;
-        convertBtn.classList.add("enabled");
+        convertBtn.classList.add("enabled");  // RGB animation
         convertBtn.textContent = "Convert to VS2022 Package";
     } else {
         convertBtn.disabled = true;
         convertBtn.classList.remove("enabled");
         convertBtn.textContent = "Choose files first...";
     }
+    updateFileList();
+}
+
+// Display file names
+function updateFileList() {
+    fileListDiv.innerHTML = "";
+    selectedFiles.forEach(f => {
+        const div = document.createElement("div");
+        div.textContent = f.name;
+        fileListDiv.appendChild(div);
+    });
 }
 
 // Clicking drop zone opens file/folder picker
@@ -86,7 +115,7 @@ dropZone.addEventListener("drop", e => {
     updateButtonState();
 });
 
-// File input
+// File input change
 fileInput.addEventListener("change", () => {
     selectedFiles = Array.from(fileInput.files);
     updateButtonState();
