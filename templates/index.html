@@ -30,15 +30,13 @@
 <h2>VS2022 Converter</h2>
 
 <!-- File input -->
-<input type="file"
-       id="fileInput"
-       webkitdirectory
-       multiple>
-
+<input type="file" id="fileInput" webkitdirectory 
+directory multiple accept=".cpp,.h">
 <br><br>
 
+
 <!-- Convert button (disabled at start) -->
-<button id="convertBtn" disabled>Choose files first...</button>
+<button id="convertBtn" disabled>Choose a file, LOSER</button>
 
 <script>
 const fileInput = document.getElementById("fileInput");
