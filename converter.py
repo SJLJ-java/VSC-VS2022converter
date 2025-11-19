@@ -44,7 +44,6 @@ VCXPROJ_TEMPLATE = r"""<?xml version="1.0" encoding="utf-8"?>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-
 </Project>
 """
 
@@ -52,7 +51,7 @@ SLN_TEMPLATE = """Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{{FAKEGUID}}") = "ConvertedProject", "ConvertedProject.vcxproj", "{GUID}"
+Project("{FAKEGUID}") = "ConvertedProject", "ConvertedProject.vcxproj", "{GUID}"
 EndProject
 Global
     GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -69,63 +68,50 @@ EndGlobal
 """
 
 def collect_files(files):
-    cpp_files = []
-    h_files = []
-
+    cpp_files, h_files = [], []
     for f in files:
         name = f.filename.replace("\\", "/")
         parts = name.split("/")
-
-        # skip junk folders
-        if any(p in IGNORED_DIRS for p in parts):
-            continue
-
-        if name.endswith(".cpp"):
-            cpp_files.append(name)
-        elif name.endswith(".h") or name.endswith(".hpp"):
-            h_files.append(name)
-
+        if any(p in IGNORED_DIRS for p in parts): continue
+        if name.endswith(".cpp"): cpp_files.append(name)
+        elif name.endswith(".h") or name.endswith(".hpp"): h_files.append(name)
     return cpp_files, h_files
-
 
 @app.post("/convert")
 def convert_folder():
     files = request.files.getlist("files")
-
     tempdir = tempfile.mkdtemp()
     proj_dir = os.path.join(tempdir, "ConvertedProject")
     os.makedirs(proj_dir)
 
-    # Save all uploaded files
     for f in files:
         out = os.path.join(proj_dir, f.filename)
         os.makedirs(os.path.dirname(out), exist_ok=True)
         f.save(out)
 
     cpp_files, h_files = collect_files(files)
-
-    # Generate vcxproj entries
     src_entries = "\n".join(f'    <ClCompile Include="{f}" />' for f in cpp_files)
     hdr_entries = "\n".join(f'    <ClInclude Include="{f}" />' for f in h_files)
 
     guid = "{" + str(uuid.uuid4()).upper() + "}"
+    fake_guid = "{" + str(uuid.uuid4()).upper() + "}"
 
     vcxproj_text = VCXPROJ_TEMPLATE.replace("{SOURCES}", src_entries).replace("{HEADERS}", hdr_entries).replace("{GUID}", guid)
-    sln_text = SLN_TEMPLATE.replace("{GUID}", guid)
+    sln_text = SLN_TEMPLATE.replace("{GUID}", guid).replace("{FAKEGUID}", fake_guid)
 
-    # write vcxproj + sln
-    with open(os.path.join(proj_dir, "ConvertedProject.vcxproj"), "w") as f:
-        f.write(vcxproj_text)
+    with open(os.path.join(proj_dir, "ConvertedProject.vcxproj"), "w") as f: f.write(vcxproj_text)
+    with open(os.path.join(proj_dir, "ConvertedProject.sln"), "w") as f: f.write(sln_text)
 
-    with open(os.path.join(proj_dir, "ConvertedProject.sln"), "w") as f:
-        f.write(sln_text)
-
-    # zip project
     zip_path = os.path.join(tempdir, "VS2022_Converted_Project.zip")
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as z:
-        for root, dirs, files in os.walk(proj_dir):
-            for file in files:
+        for root, _, files_in_dir in os.walk(proj_dir):
+            for file in files_in_dir:
                 path = os.path.join(root, file)
                 z.write(path, arcname=os.path.relpath(path, proj_dir))
 
     return send_file(zip_path, as_attachment=True)
+
+if __name__ == "__main__":
+    import os
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)

@@ -2,15 +2,17 @@
 <html>
 <head>
     <title>VS2022 Converter</title>
-
     <style>
-        /* Disabled button */
+        #convertBtn {
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+
         #convertBtn:disabled {
             background: #777;
             cursor: not-allowed;
         }
 
-        /* RGB animation when enabled */
         @keyframes rgbRotate {
             0%   { background: red; }
             33%  { background: green; }
@@ -18,10 +20,20 @@
             100% { background: red; }
         }
 
-        /* Apply animation only when enabled */
         #convertBtn.enabled {
             color: white;
             animation: rgbRotate 3s linear infinite;
+        }
+
+        #dropZone {
+            width: 100%;
+            height: 100px;
+            border: 2px dashed #aaa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -29,44 +41,83 @@
 
 <h2>VS2022 Converter</h2>
 
-<!-- File input -->
 <select id="modeSelect">
-  <option value="files">Select Files</option>
-  <option value="folder">Select Folder</option>
+    <option value="files">Select Files</option>
+    <option value="folder">Select Folder</option>
 </select>
-<input type="file" id="fileInput" multiple accept=".cpp,.h">
-<br><br>
-
-
-<!-- Convert button (disabled at start) -->
-<button id="convertBtn" disabled>Choose a file, LOSER</button>
+<input type="file" id="fileInput" multiple accept=".cpp,.h,.hpp" style="display:none">
+<div id="dropZone">Drag files/folder here or click</div>
+<button id="convertBtn" disabled>Choose files first...</button>
 
 <script>
 const fileInput = document.getElementById("fileInput");
 const convertBtn = document.getElementById("convertBtn");
+const dropZone = document.getElementById("dropZone");
+const modeSelect = document.getElementById("modeSelect");
 
-fileInput.addEventListener("change", () => {
+let selectedFiles = [];
 
-    if (fileInput.files.length > 0) {
-        // Enable the button
+// Enable/disable button
+function updateButtonState() {
+    if (selectedFiles.length > 0) {
         convertBtn.disabled = false;
-
-        // Apply RGB animation
         convertBtn.classList.add("enabled");
-
-        // Change button text
         convertBtn.textContent = "Convert to VS2022 Package";
     } else {
-        // If no file, disable again
         convertBtn.disabled = true;
         convertBtn.classList.remove("enabled");
         convertBtn.textContent = "Choose files first...";
     }
+}
+
+// Clicking drop zone opens file/folder picker
+dropZone.onclick = () => fileInput.click();
+
+// Drag-and-drop
+dropZone.addEventListener("dragover", e => {
+    e.preventDefault();
+    dropZone.style.background = "#eef";
+});
+dropZone.addEventListener("dragleave", () => dropZone.style.background = "");
+dropZone.addEventListener("drop", e => {
+    e.preventDefault();
+    dropZone.style.background = "";
+    selectedFiles = Array.from(e.dataTransfer.files);
+    updateButtonState();
 });
 
-// What happens when clicked
-convertBtn.addEventListener("click", () => {
-    document.getElementById("uploadForm").submit();
+// File input
+fileInput.addEventListener("change", () => {
+    selectedFiles = Array.from(fileInput.files);
+    updateButtonState();
+});
+
+// Mode select for folder picker
+modeSelect.addEventListener("change", () => {
+    if (modeSelect.value === "folder") {
+        fileInput.setAttribute("webkitdirectory", "");
+        fileInput.setAttribute("directory", "");
+    } else {
+        fileInput.removeAttribute("webkitdirectory");
+        fileInput.removeAttribute("directory");
+    }
+});
+
+// Convert button click -> send files to Flask backend
+convertBtn.addEventListener("click", async () => {
+    if (convertBtn.disabled) return;
+
+    const formData = new FormData();
+    selectedFiles.forEach(f => formData.append("files", f));
+
+    const response = await fetch("/convert", { method: "POST", body: formData });
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "VS2022_Converted_Project.zip";
+    a.click();
 });
 </script>
 
