@@ -1,51 +1,73 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>VSC → VS2022 Converter</title>
-<style>
-    body {
-        font-family: sans-serif;
-        padding: 40px;
-    }
+    <title>VS2022 Converter</title>
 
-    #convertBtn {
-        padding: 12px 20px;
-        font-size: 16px;
-        border: none;
-        border-radius: 6px;
-        cursor: not-allowed;
-        background: #aaa;
-        color: #fff;
-        transition: background 0.3s, cursor 0.3s;
-    }
+    <style>
+        /* Disabled button */
+        #convertBtn:disabled {
+            background: #777;
+            cursor: not-allowed;
+        }
 
-    #convertBtn.enabled {
-        background: #0078FF;
-        cursor: pointer;
-    }
+        /* RGB animation when enabled */
+        @keyframes rgbRotate {
+            0%   { background: red; }
+            33%  { background: green; }
+            66%  { background: blue; }
+            100% { background: red; }
+        }
 
-    #dropZone {
-        border: 2px dashed #888;
-        padding: 30px;
-        text-align: center;
-        color: #666;
-        margin-bottom: 20px;
-    }
-</style>
+        /* Apply animation only when enabled */
+        #convertBtn.enabled {
+            color: white;
+            animation: rgbRotate 3s linear infinite;
+        }
+    </style>
 </head>
-
 <body>
-<h2>VSCode Folder → Visual Studio 2022 Project Converter</h2>
 
-<div id="dropZone">
-    Drop a folder here (or click to choose)
-</div>
+<h2>VS2022 Converter</h2>
 
-<input id="folderInput" type="file" webkitdirectory directory multiple hidden>
+<!-- File input -->
+<input type="file"
+       id="fileInput"
+       webkitdirectory
+       multiple>
 
-<button id="convertBtn">Convert Folder to VS2022 Project</button>
+<br><br>
 
-<script src="main.js"></script>
+<!-- Convert button (disabled at start) -->
+<button id="convertBtn" disabled>Choose files first...</button>
+
+<script>
+const fileInput = document.getElementById("fileInput");
+const convertBtn = document.getElementById("convertBtn");
+
+fileInput.addEventListener("change", () => {
+
+    if (fileInput.files.length > 0) {
+        // Enable the button
+        convertBtn.disabled = false;
+
+        // Apply RGB animation
+        convertBtn.classList.add("enabled");
+
+        // Change button text
+        convertBtn.textContent = "Convert to VS2022 Package";
+    } else {
+        // If no file, disable again
+        convertBtn.disabled = true;
+        convertBtn.classList.remove("enabled");
+        convertBtn.textContent = "Choose files first...";
+    }
+});
+
+// What happens when clicked
+convertBtn.addEventListener("click", () => {
+    alert("Now send files to backend with fetch or form upload.");
+});
+</script>
+
 </body>
 </html>
