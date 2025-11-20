@@ -15,7 +15,6 @@ os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 def index():
     return render_template("index.html")
 
-
 @app.route("/upload", methods=["POST"])
 def upload():
     if "file" not in request.files:

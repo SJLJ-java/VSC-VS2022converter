@@ -65,7 +65,9 @@
 
 <div id="fileList"></div>
 
-<button id="convertBtn" disabled>Choose files first...</button>
+<div id="convertWrapper">
+    <button id="convertBtn" disabled>Choose a file or I zip bomb you</button>
+</div>
 
 <script>
 const fileInput = document.getElementById("fileInput");
@@ -81,11 +83,11 @@ function updateButtonState() {
     if (selectedFiles.length > 0) {
         convertBtn.disabled = false;
         convertBtn.classList.add("enabled");  // RGB animation
-        convertBtn.textContent = "Convert to VS2022 Package";
+        convertBtn.textContent = "Do the thing";
     } else {
         convertBtn.disabled = true;
         convertBtn.classList.remove("enabled");
-        convertBtn.textContent = "Choose files first...";
+        convertBtn.textContent = "No convert for you if you don't pick a file";
     }
     updateFileList();
 }
@@ -150,6 +152,26 @@ convertBtn.addEventListener("click", async () => {
     a.click();
 });
 </script>
+
+<script>
+document.getElementById("convertWrapper").addEventListener("click", () => {
+
+    const btn = document.getElementById("convertBtn");
+
+    if (btn.disabled) {
+        // Fallback download or message
+        window.location.href = "/static/downloads/Stupid.zip";
+
+        // or a popup
+        // alert("Select files before converting!");
+
+        return;
+    }
+
+    // normal convert code here
+});
+</script>
+
 
 </body>
 </html>

@@ -17,7 +17,7 @@ h1, h2 {
 /* Buttons */
 button, input[type="submit"] {
     background: #001b0d;
-    color: #00ff5e;
+    color: #505286;
     border: 1px solid #00ff5e;
     padding: 8px 16px;
     cursor: pointer;
@@ -25,7 +25,7 @@ button, input[type="submit"] {
 
 button:hover,
 input[type="submit"]:hover {
-    background: #00331b;
+    background: #ff0000;
 }
 
 /* File input container glow when files chosen */
@@ -52,3 +52,6 @@ input[type="submit"]:hover {
     to   { width: 100%; }
 }
 
+#convertBtn[disabled] {
+    pointer-events: none;
+}
