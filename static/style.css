@@ -1,0 +1,54 @@
+/* ===== Retro Hacker Terminal Theme ===== */
+
+body {
+    background: #000000;
+    color: #0011ff;
+    font-family: "Consolas", "Courier New", monospace;
+    padding: 20px;
+}
+
+/* Headers */
+h1, h2 {
+    border-left: 4px solid #00ff5e;
+    padding-left: 10px;
+    margin-bottom: 20px;
+}
+
+/* Buttons */
+button, input[type="submit"] {
+    background: #001b0d;
+    color: #00ff5e;
+    border: 1px solid #00ff5e;
+    padding: 8px 16px;
+    cursor: pointer;
+}
+
+button:hover,
+input[type="submit"]:hover {
+    background: #00331b;
+}
+
+/* File input container glow when files chosen */
+.file-selected {
+    border: 1px solid #00ff5e;
+    box-shadow: 0 0 12px #00ff5e;
+}
+
+/* File list output */
+#fileList {
+    margin-top: 10px;
+    padding-left: 10px;
+    border-left: 2px dashed #00ff5e;
+}
+
+.typewriter {
+    overflow: hidden;
+    white-space: nowrap;
+    animation: typing 2s steps(40) forwards;
+}
+
+@keyframes typing {
+    from { width: 0; }
+    to   { width: 100%; }
+}
+

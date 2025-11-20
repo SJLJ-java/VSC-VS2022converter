@@ -20,7 +20,7 @@
             0%   { border-color: red; }
             33%  { border-color: lime; }
             66%  { border-color: cyan; }
-            100% { border-color: red; }
+            100% { border-color: rgb(0, 0, 0); }
         }
 
         #fileList {
@@ -35,14 +35,15 @@
             border-radius: 4px;
         }
     </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
 <h2>Select CPP Files</h2>
 
 <form action="/upload" method="POST" enctype="multipart/form-data">
-    <input id="fileInput" type="file" name="file" accept=".cpp" required>
-    <button type="submit">Upload</button>
+<input id="fileInput" type="file" name="file" accept=".cpp" multiple>
+<button type="submit">Upload</button>
 </form>
 
 <ul id="fileList"></ul>
