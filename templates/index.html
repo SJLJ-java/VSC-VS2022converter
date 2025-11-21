@@ -4,12 +4,13 @@
     <title>VS2022 Converter</title>
     <style>
         #convertBtn {
-            padding: 10px 20px;
+            padding: 20px 40px;
             font-size: 16px;
         }
 
         #convertBtn:disabled {
             background: #777;
+            animation: rgbBad 2s linear infinite;
             cursor: not-allowed;
         }
 
@@ -19,11 +20,33 @@
             66%  { background: blue; }
             100% { background: red; }
         }
+    
+    @keyframes rgbBad{
+            0% {background: red}
+            100% {background: blue}
+        }
+
+    @keyframes runH {
+            0% {left: 0%}
+            50% {left: 100%}
+            100% {left: 0%}
+        
+        }
+
+    @keyframes runV {
+        0%   { transform: translateY(0px); }
+        50%  { transform: translateY(400px); }
+        100% { transform: translateY(0px); }
+        }
 
         #convertBtn.enabled {
             color: white;
-            animation: rgbRotate 3s linear infinite;
+            position: relative;
+            animation: rgbRotate 3s linear infinite,
+            runH 1s linear infinite,
+            runV 1.5s linear infinite;
         }
+
 
         #dropZone {
             width: 100%;
@@ -60,7 +83,7 @@
     <option value="folder">Select Folder</option>
 </select>
 
-<input type="file" id="fileInput" multiple accept=".cpp,.h,.hpp" style="display:none">
+<input type="file" id="fileInput" accept=".cpp,.h,.hpp" style="display:none" multiple>
 <div id="dropZone">Drag files/folder here or click</div>
 
 <div id="fileList"></div>
@@ -82,7 +105,7 @@ let selectedFiles = [];
 function updateButtonState() {
     if (selectedFiles.length > 0) {
         convertBtn.disabled = false;
-        convertBtn.classList.add("enabled");  // RGB animation
+        convertBtn.classList.add("enabled");
         convertBtn.textContent = "Do the thing";
     } else {
         convertBtn.disabled = true;
@@ -92,7 +115,6 @@ function updateButtonState() {
     updateFileList();
 }
 
-// Display file names
 function updateFileList() {
     fileListDiv.innerHTML = "";
     selectedFiles.forEach(f => {
@@ -152,26 +174,5 @@ convertBtn.addEventListener("click", async () => {
     a.click();
 });
 </script>
-
-<script>
-document.getElementById("convertWrapper").addEventListener("click", () => {
-
-    const btn = document.getElementById("convertBtn");
-
-    if (btn.disabled) {
-        // Fallback download or message
-        window.location.href = "/static/downloads/Stupid.zip";
-
-        // or a popup
-        // alert("Select files before converting!");
-
-        return;
-    }
-
-    // normal convert code here
-});
-</script>
-
-
 </body>
 </html>

@@ -4,7 +4,6 @@ const convertBtn = document.getElementById("convertBtn");
 
 let selectedFiles = null;
 
-// Enable button only when a folder is selected
 function updateButtonState() {
     if (selectedFiles && selectedFiles.length > 0) {
         convertBtn.classList.add("enabled");
@@ -15,10 +14,8 @@ function updateButtonState() {
     }
 }
 
-// Clicking the drop zone opens folder picker
 dropZone.onclick = () => folderInput.click();
 
-// Drag events
 dropZone.addEventListener("dragover", e => {
     e.preventDefault();
     dropZone.style.background = "#eef";
@@ -34,13 +31,11 @@ dropZone.addEventListener("drop", e => {
     updateButtonState();
 });
 
-// File picker
 folderInput.addEventListener("change", () => {
     selectedFiles = folderInput.files;
     updateButtonState();
 });
 
-// Button click = send files to backend
 convertBtn.addEventListener("click", async () => {
     if (!convertBtn.classList.contains("enabled")) return;
 
